@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+
+  <head>
+    <title>Metals prices</title>
+    <script src="./js/Chart.bundle.js"></script>
+    <script src="./js/jquery-v2.2.4.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="./css/styles.css" />
+    <link href="https://fonts.googleapis.com/css?family=Nunito+Sans" rel="stylesheet">
+
+
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="chart-container">
+        <div class="period-selector">
+          <input type="radio" name="aluminum" id="aluminum-3Y" value="36" />
+          <label for="aluminum-3Y">3Y</label>
+          <input type="radio" name="aluminum" id="aluminum-2Y" value="24" />
+          <label for="aluminum-2Y">2Y</label>
+          <input type="radio" name="aluminum" id="aluminum-1Y" value="12" checked />
+          <label for="aluminum-1Y">1Y</label>
+          <input type="radio" name="aluminum" id="aluminum-6M" value="6" />
+          <label for="aluminum-6M">6M</label>
+          <input type="radio" name="aluminum" id="aluminum-3M" value="3" />
+          <label for="aluminum-3M">3M</label>
+        </div>
+        <canvas id="aluminum"></canvas>
+      </div>
+      
+      <div class="chart-container">
+         <div class="period-selector">
+          <input type="radio" name="omi" id="omi-3Y" value="36" />
+          <label for="omi-3Y">3Y</label>
+          <input type="radio" name="omi" id="omi-2Y" value="24" />
+          <label for="omi-2Y">2Y</label>
+          <input type="radio" name="omi" id="omi-1Y" value="12" checked />
+          <label for="omi-1Y">1Y</label>
+          <input type="radio" name="omi" id="omi-6M" value="6" />
+          <label for="omi-6M">6M</label>
+          <input type="radio" name="omi" id="omi-3M" value="3" />
+          <label for="omi-3M">3M</label>
+        </div>
+        <canvas id="omi"></canvas>
+      </div>
+    </div>
+  </body>
+  <script src="./js/app.js"></script>
+
+</html>

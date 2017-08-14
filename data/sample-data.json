@@ -1,0 +1,30 @@
+{
+  "metal": "aluminum", 
+  "price_data": { 
+    "history" : [
+      {
+        "year-mo": "2013_01",
+        "price": 1234
+      },
+      {
+        "year-mo": "2013_02",
+        "price": 1235
+      },
+      {
+        ...
+      }
+    ]},
+    "projection": [
+       {
+        "year-mo": "2017_01",
+        "price": 1234
+      },
+      {
+        "year-mo": "2017_02",
+        "price": 1235
+      },
+      {
+        ...
+      }
+    ]} 
+}
