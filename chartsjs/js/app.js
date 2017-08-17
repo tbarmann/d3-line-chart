@@ -1,7 +1,8 @@
 var chartData = {};
 var charts = [];
-var defaultMonthsToShow = 12;
+var defaultMonthsToShow = 6;
 var chartBackgroundColor = '#212429';
+var customRed = '#FF4000';
 
 function getData() {
   var metals = ['omi', 'aluminum'];
@@ -41,12 +42,15 @@ function buildConfig(history, metal) {
     },
     responsive: true,
     title:{
-      display:true,
-      text: metal
+      display:false
     },
     tooltips: {
       mode: 'index',
       intersect: false,
+      enabled: false
+    },
+    legend: {
+      display: false
     },
     hover: {
       mode: 'nearest',
@@ -79,21 +83,18 @@ function buildConfig(history, metal) {
   return {
     type: 'line',
     data: {
-      pointDotRadius: 1,
-      pointDotStrokeWidth: 18,
       pointHitDetectionRadius: 20,
       labels: dates,
       datasets: [{
         label: 'Actual',
         lineTension: 0,
-        backgroundColor: 'red',
-        borderColor: 'red',
+        backgroundColor: customRed,
+        borderColor:  customRed,
         data: prices,
         fill: false,
-        pointColor: 'rgba(87, 167, 134, 1)',
-        pointStrokeColor: 'rgba(255, 255, 255, 0)',
-        pointHighlightFill: 'rgba(87, 167, 134, 0.7)',
-        pointHighlightStroke: 'rgba(87, 167, 134, 1)'
+        pointHoverRadius: 4,
+        pointHighlihtStroke: 4,
+        pointHoverBackgroundColor: chartBackgroundColor
       }]
     },
     options: options
