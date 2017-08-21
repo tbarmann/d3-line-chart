@@ -6,7 +6,6 @@ var chartBackgroundColor = '#212429';
 // var chartBackgroundColor = '#fff';
 var customRed = '#FF4000';
 
-Chart.defaults.global.defaultColor = 'green';
 
 function getData() {
   var metals = ['omi', 'aluminum'];
@@ -42,13 +41,14 @@ function buildConfig(history, metal) {
   });
   var options = {
     layout: {
-      padding: {top: 50, left: 50, right: 75, bottom: 50}
+      padding: {top: 75, left: 50, right: 75, bottom: 50}
     },
     responsive: true,
     title:{
       display:false
     },
     tooltips: {
+      yAlign: 'top',
       enabled: false,
       custom: customToolTip(metal),
       callbacks: {
@@ -74,13 +74,6 @@ function buildConfig(history, metal) {
         hitRadius: 10
       }
     },
-    annotations:  [{
-      type: 'line',
-      mode: 'vertical',
-      scaleID: 'x-axis',
-      borderColor: 'yellow',
-      borderWidth: 2
-    }],
     scales: {
       xAxes: [{
         ticks: {
@@ -112,6 +105,7 @@ function buildConfig(history, metal) {
       yAxes: [{
         gridLines: {
           display: false,
+          color: 'white',
           drawBorder: false,
           zeroLineColor: 'white',
 
@@ -122,8 +116,17 @@ function buildConfig(history, metal) {
         },
         ticks: {
           callback: function(value, index, values) {
-            return '$' + value;
+            if (index === values.length - 1)  {
+              return '$' + Math.min.apply(this, prices);
+            }
+            if (index === 0) {
+              return '$' + Math.max.apply(this, prices);
+            }
+            return '';
           },
+          min: Math.min.apply(this, prices),
+          max: Math.max.apply(this, prices),
+          // maxTicksLimit: 2, // show only first and last
           fontColor: "#fff"
         }
       }]
@@ -186,7 +189,7 @@ function customToolTip(metal) {
 
     // Hide if no tooltip
     if (tooltipModel.opacity === 0) {
-      tooltipEl.style.opacity = 0;
+     tooltipEl.style.opacity = 0;
     return;
     }
 
@@ -219,11 +222,16 @@ function customToolTip(metal) {
 
     // `this` will be the overall tooltip
     var position = this._chart.canvas.getBoundingClientRect();
-
+    var tooltipWidth = tooltipEl.clientWidth;
+    var tooltipHeight = tooltipEl.clientHeight;
+    
+    // get offsets to center and place tooltip above point
+    hOffset = tooltipWidth / -2;
+    vOffset = (tooltipHeight * -1) - 20;
     // Display, position, and set styles for font
     tooltipEl.style.opacity = 1;
-    tooltipEl.style.left = position.left + tooltipModel.caretX + 'px';
-    tooltipEl.style.top = position.top + tooltipModel.caretY + 'px';
+    tooltipEl.style.left = position.left + hOffset + tooltipModel.caretX + 'px';
+    tooltipEl.style.top = position.top + vOffset + tooltipModel.caretY + 'px';
   }
 }
 

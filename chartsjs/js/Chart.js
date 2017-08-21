@@ -8072,6 +8072,9 @@ module.exports = function(Chart) {
 				var niceMin = Math.floor(dataRange.min / spacing) * spacing;
 				var niceMax = Math.ceil(dataRange.max / spacing) * spacing;
 
+        // var niceMin = dataRange.min;
+        // var niceMax = dataRange.max;
+
 				// If min, max and stepSize is set and they make an evenly spaced scale use it.
 				if (generationOptions.min && generationOptions.max && generationOptions.stepSize) {
 					// If very close to our whole number, use it.

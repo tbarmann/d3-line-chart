@@ -93,4 +93,6 @@ canvas {
 }
 .custom-tooltip .date {
   width: 50%;
+  background-color: rgba(33,36,41, 0.5);
+
 }
