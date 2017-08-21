@@ -2,15 +2,17 @@
 var chartData = {};
 var charts = [];
 var defaultMonthsToShow = 6;
-// var chartBackgroundColor = '#212429';
-var chartBackgroundColor = '#fff';
+var chartBackgroundColor = '#212429';
+// var chartBackgroundColor = '#fff';
 var customRed = '#FF4000';
+
+Chart.defaults.global.defaultColor = 'green';
 
 function getData() {
   var metals = ['omi', 'aluminum'];
   var urls = metals.map(function(metal) {
-    // return './js/' + metal + '.json';
-    return 'https://www.e-illuminati.com/api.php?metal=' + metal + '&startDate=2013_01';
+    return './js/' + metal + '.json';
+    // return 'https://www.e-illuminati.com/api.php?metal=' + metal + '&startDate=2013_01';
   });
   urls.forEach(function(url){
     $.getJSON(url, function(response) {
@@ -48,7 +50,12 @@ function buildConfig(history, metal) {
     },
     tooltips: {
       enabled: false,
-      custom: customToolTip(metal)
+      custom: customToolTip(metal),
+      callbacks: {
+        label: function(tooltipItem, data) {
+          return '$' + parseFloat(tooltipItem.yLabel).toFixed(2);
+        }
+      }
     },
     legend: {
       display: false
@@ -71,15 +78,22 @@ function buildConfig(history, metal) {
       type: 'line',
       mode: 'vertical',
       scaleID: 'x-axis',
-      borderColor: '#b6fcd5',
+      borderColor: 'yellow',
       borderWidth: 2
     }],
     scales: {
       xAxes: [{
+        ticks: {
+          fontColor: "white",
+          callback: function(value, index, arr) {
+            return (index === 0 || index  === arr.length-1) ? value.split(' ') : null;
+          }
+        },
         gridLines: {
-          color: '#444444',
+          zeroLineColor: 'white',
+          color: 'white',
           drawBorder: false,
-          display: false
+          display: true
         },
         display: true,
         type: 'time',
@@ -87,7 +101,9 @@ function buildConfig(history, metal) {
         unitStepSize: 1,
         time: {
           displayFormats: {'month': 'MMM YYYY'},
-          unit: 'month'
+          unit: 'month',
+          tooltipFormat: 'MMM YYYY'
+
         },
         scaleLabel: {
           display: false
@@ -96,11 +112,19 @@ function buildConfig(history, metal) {
       yAxes: [{
         gridLines: {
           display: false,
-          drawBorder: false
+          drawBorder: false,
+          zeroLineColor: 'white',
+
         },
         display: true,
         scaleLabel: {
           display: false
+        },
+        ticks: {
+          callback: function(value, index, values) {
+            return '$' + value;
+          },
+          fontColor: "#fff"
         }
       }]
     }
@@ -119,6 +143,8 @@ function buildConfig(history, metal) {
         borderColor:  customRed,
         data: prices,
         fill: false,
+        pointColor: customRed,
+        pointStrokeColor: 'rgb(255,255,255,0)',
         pointHoverRadius: 7,
         pointHoverBorderWidth: 5,
         pointHoverBackgroundColor: chartBackgroundColor
@@ -133,7 +159,6 @@ window.onload = function() {
 };
 
 $('.period-selector input[type=radio]').on('change', function() {
-  //console.log(this.name, this.value);
   var metal = this.name;
   var history = chartData[metal].price_data.history;
   var months = parseInt(this.value, 10);
@@ -154,13 +179,14 @@ function customToolTip(metal) {
     if (!tooltipEl) {
       tooltipEl = document.createElement('div');
       tooltipEl.id = 'chartjs-tooltip-' + metal;
+      tooltipEl.classList.add('custom-tooltip');
       tooltipEl.innerHTML = "<table></table>"
       document.body.appendChild(tooltipEl);
     }
 
     // Hide if no tooltip
     if (tooltipModel.opacity === 0) {
-      // tooltipEl.style.opacity = 0;
+      tooltipEl.style.opacity = 0;
     return;
     }
 
@@ -181,22 +207,11 @@ function customToolTip(metal) {
       var titleLines = tooltipModel.title || [];
       var bodyLines = tooltipModel.body.map(getBody);
 
-      var innerHtml = '<thead>';
+      var innerHtml = '<tbody><tr>';
 
-      titleLines.forEach(function(title) {
-        innerHtml += '<tr><th>' + title + '</th></tr>';
-      });
-      innerHtml += '</thead><tbody>';
-
-      bodyLines.forEach(function(body, i) {
-        var colors = tooltipModel.labelColors[i];
-        var style = 'background:' + colors.backgroundColor;
-        style += '; border-color:' + colors.borderColor;
-        style += '; border-width: 2px';
-        var span = '<span class="chartjs-tooltip-key" style="' + style + '"></span>';
-        innerHtml += '<tr><td>' + span + body + '</td></tr>';
-      });
-      innerHtml += '</tbody>';
+      innerHtml += '<td class="date">' + tooltipModel.title[0] + '</td>';
+      innerHtml += '<td class="price">' + bodyLines[0] + '</td>';
+      innerHtml += '</tr></tbody>';
 
       var tableRoot = tooltipEl.querySelector('table');
       tableRoot.innerHTML = innerHtml;
@@ -209,10 +224,6 @@ function customToolTip(metal) {
     tooltipEl.style.opacity = 1;
     tooltipEl.style.left = position.left + tooltipModel.caretX + 'px';
     tooltipEl.style.top = position.top + tooltipModel.caretY + 'px';
-    tooltipEl.style.fontFamily = tooltipModel._fontFamily;
-    tooltipEl.style.fontSize = tooltipModel.fontSize;
-    tooltipEl.style.fontStyle = tooltipModel._fontStyle;
-    tooltipEl.style.padding = tooltipModel.yPadding + 'px ' + tooltipModel.xPadding + 'px';
   }
 }
 

@@ -18,8 +18,8 @@ canvas {
 }
 .period-selector {
   position: absolute;
-  right: 75px;
-  top: 30px;
+  right: 10%;
+  top: 10%;
   z-index:10;
   display: none;
 }
@@ -75,4 +75,22 @@ canvas {
 
 .period-selector label:last-of-type {
   border-radius: 0 3px 3px 0;
+}
+
+.custom-tooltip {
+  position: absolute;
+  font-family: 'Nunito Sans', sans-serif;
+  color: white;
+}
+
+.custom-tooltip .price {
+  background-color: #FF4000;
+  width: 50%;
+}
+
+.custom-tooltip td {
+  padding: 5px 7px;
+}
+.custom-tooltip .date {
+  width: 50%;
 }
