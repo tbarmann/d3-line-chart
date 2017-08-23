@@ -1,17 +1,15 @@
 <!doctype html>
 <html>
-
   <head>
     <title>Metals prices</title>
     <link rel="stylesheet" type="text/css" href="./css/styles.css" />
     <link href="./css/fonts/fonts.css" rel="stylesheet">
-
-
   </head>
 
   <body>
     <div class="container">
-      <div class="chart-container">
+      <div id="aluminum" class="chart-container">
+        <canvas></canvas>
         <div class="period-selector">
           <input type="radio" name="aluminum" id="aluminum-3Y" value="36" />
           <label for="aluminum-3Y">3Y</label>
@@ -23,12 +21,13 @@
           <label for="aluminum-6M">6M</label>
           <input type="radio" name="aluminum" id="aluminum-3M" value="3" />
           <label for="aluminum-3M">3M</label>
+          <div data-metal="aluminum" class="download-button"></div>
         </div>
-        <canvas id="aluminum"></canvas>
       </div>
       
-      <div class="chart-container">
-         <div class="period-selector">
+      <div id="omi" class="chart-container">
+      <canvas></canvas>
+        <div class="period-selector">
           <input type="radio" name="omi" id="omi-3Y" value="36" />
           <label for="omi-3Y">3Y</label>
           <input type="radio" name="omi" id="omi-2Y" value="24" />
@@ -39,8 +38,8 @@
           <label for="omi-6M">6M</label>
           <input type="radio" name="omi" id="omi-3M" value="3" />
           <label for="omi-3M">3M</label>
+          <div data-metal="omi" class="download-button"></div>
         </div>
-        <canvas id="omi"></canvas>
       </div>
     </div>
   </body>
@@ -48,7 +47,8 @@
   <script src="./js/Chart.js"></script>
   <script src="./js/jquery-v2.2.4.js"></script>
   <script src="./js/lodash.min.js"></script>
-
+  <script src="./js/FileSaver.min.js"></script>
+  <script src="./js/canvas-to-blob.min.js"></script>
   <script src="./js/app.js"></script>
 
 </html>

@@ -3,9 +3,37 @@ var chartData = {};
 var charts = [];
 var defaultMonthsToShow = 6;
 var chartBackgroundColor = '#212429';
-// var chartBackgroundColor = '#fff';
 var customRed = '#FF4000';
+var chartPadding = {top: 125, left: 50, right: 75, bottom: 50};
+var xAxisFontColor = "white";
 
+Chart.plugins.register({
+  beforeDraw: function(chartInstance) {
+    var ctx = chartInstance.chart.ctx;
+    ctx.fillStyle = chartBackgroundColor;
+    ctx.fillRect(0, 0, chartInstance.chart.width, chartInstance.chart.height);
+  },
+  afterDatasetsDraw: function(chart) {
+    if (chart.tooltip._active && chart.tooltip._active.length) {
+      var activePoint = chart.tooltip._active[0],
+        ctx = chart.ctx,
+        y_axis = chart.scales['y-axis-0'],
+        x = activePoint.tooltipPosition().x,
+        topY = y_axis.top,
+        bottomY = y_axis.bottom + 10;
+        
+      // draw line
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(x, topY);
+      ctx.lineTo(x, bottomY);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'white';
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+});
 
 function getData() {
   var metals = ['omi', 'aluminum'];
@@ -16,32 +44,101 @@ function getData() {
   urls.forEach(function(url){
     $.getJSON(url, function(response) {
       var metal = response.metal;
-      var history = sliceHistory(response.price_data.history, defaultMonthsToShow);
-      var config = buildConfig(history, metal);
+      var priceData = slicePriceData(response.price_data, defaultMonthsToShow);
+      var config = buildConfig(priceData, metal);
       chartData[metal] = response;
-      var ctx = document.getElementById(metal);
-      ctx.style.backgroundColor = chartBackgroundColor;
+      var container = document.getElementById(metal);
+      var canvas = container.querySelector('canvas');
+      var ctx = canvas.getContext('2d');
       charts[metal] = new Chart(ctx, config);
       $('.period-selector').show();
     });
   });  
 }
 
-function sliceHistory(history, months) {
-  var count = history.length;
-  return history.slice(count - months);
+function slicePriceData(priceData, months) {
+  var count = priceData.history.length;
+  if (priceData.projection) {
+    count += priceData.projection.length;
+    return {
+      history: priceData.history.slice(count - months),
+      projection: priceData.projection
+    };
+  }
+  return {
+    history: priceData.history.slice(count - months)
+  };
 }
 
-function buildConfig(history, metal) {
-  var dates = history.map(function(point){
-    return  moment(point['year-mo'], 'YYYY_MM').toDate();
+function buildConfig(price_data, metal) {
+  var history = price_data.history;
+  var projection = price_data.projection;
+  var combined = (projection) ? history.concat(projection) : history.slice();
+
+  // used to set y-axis
+  var allDates = combined.map(function(point){
+    return moment(point['year-mo'], 'YYYY_MM').toDate();
   });
-  var prices = history.map(function(point){
+
+  // used to set min/max for y-axis
+  var allPrices = combined.map(function(point){
     return point.price;
   });
+
+  var actualPrices = history.map(function(point) {
+    return point.price;
+  });
+
+  var projectedPrices = actualPrices.map(function(price, index) {
+    return (index === actualPrices.length -1) ? price : null;
+  });
+
+  if (projection) {
+    projection.forEach(function(point) {
+      actualPrices.push(null);
+      projectedPrices.push(point.price);
+    });
+  }
+
+  var dataset1 = {
+    label: 'Actual',
+    lineTension: 0,
+    lineBorderWidth: 5,
+    backgroundColor: customRed,
+    borderColor:  customRed,
+    data: actualPrices,
+    fill: false,
+    pointColor: customRed,
+    pointStrokeColor: 'rgb(255,255,255,0)',
+    pointHoverRadius: 7,
+    pointHoverBorderWidth: 5,
+    pointHoverBackgroundColor: chartBackgroundColor
+  };
+
+  var dataset2 = {
+    label: 'Projected',
+    lineTension: 0,
+    lineBorderWidth: 5,
+    backgroundColor: customRed,
+    borderColor:  customRed,
+    data: projectedPrices,
+    fill: false,
+    pointColor: customRed,
+    pointStrokeColor: 'rgb(255,255,255,0)',
+    pointHoverRadius: 7,
+    pointHoverBorderWidth: 5,
+    pointHoverBackgroundColor: chartBackgroundColor,
+    borderDash: [10, 5]
+  };
+
+  var datasets = [dataset1];
+  if (projection) {
+    datasets.push(dataset2);
+  }
+
   var options = {
     layout: {
-      padding: {top: 75, left: 50, right: 75, bottom: 50}
+      padding: chartPadding
     },
     responsive: true,
     title:{
@@ -49,8 +146,8 @@ function buildConfig(history, metal) {
     },
     tooltips: {
       yAlign: 'top',
-      enabled: false,
-      custom: customToolTip(metal),
+      enabled: true,
+ //     custom: customToolTip(metal),
       callbacks: {
         label: function(tooltipItem, data) {
           return '$' + parseFloat(tooltipItem.yLabel).toFixed(2);
@@ -77,7 +174,7 @@ function buildConfig(history, metal) {
     scales: {
       xAxes: [{
         ticks: {
-          fontColor: "white",
+          fontColor: xAxisFontColor,
           callback: function(value, index, arr) {
             return (index === 0 || index  === arr.length-1) ? value.split(' ') : null;
           }
@@ -107,8 +204,7 @@ function buildConfig(history, metal) {
           display: false,
           color: 'white',
           drawBorder: false,
-          zeroLineColor: 'white',
-
+          zeroLineColor: 'white'
         },
         display: true,
         scaleLabel: {
@@ -117,16 +213,15 @@ function buildConfig(history, metal) {
         ticks: {
           callback: function(value, index, values) {
             if (index === values.length - 1)  {
-              return '$' + Math.min.apply(this, prices);
+              return '$' + Math.min.apply(this, allPrices);
             }
             if (index === 0) {
-              return '$' + Math.max.apply(this, prices);
+              return '$' + Math.max.apply(this, allPrices);
             }
             return '';
           },
-          min: Math.min.apply(this, prices),
-          max: Math.max.apply(this, prices),
-          // maxTicksLimit: 2, // show only first and last
+          min: Math.min.apply(this, allPrices),
+          max: Math.max.apply(this, allPrices),
           fontColor: "#fff"
         }
       }]
@@ -137,21 +232,8 @@ function buildConfig(history, metal) {
     type: 'line',
     data: {
       pointHitDetectionRadius: 20,
-      labels: dates,
-      datasets: [{
-        label: 'Actual',
-        lineTension: 0,
-        lineBorderWidth: 5,
-        backgroundColor: customRed,
-        borderColor:  customRed,
-        data: prices,
-        fill: false,
-        pointColor: customRed,
-        pointStrokeColor: 'rgb(255,255,255,0)',
-        pointHoverRadius: 7,
-        pointHoverBorderWidth: 5,
-        pointHoverBackgroundColor: chartBackgroundColor
-      }]
+      labels: allDates,
+      datasets: datasets
     },
     options: options
   };
@@ -163,14 +245,16 @@ window.onload = function() {
 
 $('.period-selector input[type=radio]').on('change', function() {
   var metal = this.name;
-  var history = chartData[metal].price_data.history;
+  var priceData = chartData[metal].price_data;
   var months = parseInt(this.value, 10);
-  var newHistory = sliceHistory(history, months);
-  var newConfig = buildConfig(newHistory, metal);
-  charts[metal].config = newConfig;
-  charts[metal].update();
+  var newPriceData = slicePriceData(priceData, months);
+  var config = buildConfig(newPriceData, metal);
+  var container = document.getElementById(metal);
+  var ctx = container.querySelector('canvas');
+  ctx.style.backgroundColor = chartBackgroundColor;
+  charts[metal].destroy();
+  charts[metal] = new Chart(ctx, config);
 });
-
 
 function customToolTip(metal) {
   return function(tooltipModel) {
@@ -183,8 +267,9 @@ function customToolTip(metal) {
       tooltipEl = document.createElement('div');
       tooltipEl.id = 'chartjs-tooltip-' + metal;
       tooltipEl.classList.add('custom-tooltip');
-      tooltipEl.innerHTML = "<table></table>"
-      document.body.appendChild(tooltipEl);
+      tooltipEl.innerHTML = "<table></table>";
+      container = document.getElementById(metal);
+      container.appendChild(tooltipEl);
     }
 
     // Hide if no tooltip
@@ -226,28 +311,26 @@ function customToolTip(metal) {
     var tooltipHeight = tooltipEl.clientHeight;
     
     // get offsets to center and place tooltip above point
-    hOffset = tooltipWidth / -2;
-    vOffset = (tooltipHeight * -1) - 20;
-    // Display, position, and set styles for font
+    var hOffset = (tooltipWidth / -2) - 20;
+    var vOffset = (tooltipHeight * -1) - 20;
+    // var hOffset = 0;
+    // var hOffset = 0;
+    // Display, position
     tooltipEl.style.opacity = 1;
     tooltipEl.style.left = position.left + hOffset + tooltipModel.caretX + 'px';
     tooltipEl.style.top = position.top + vOffset + tooltipModel.caretY + 'px';
   }
 }
 
-
-// https://stackoverflow.com/questions/43113796/chart-js-vertical-crosshair-vertical-annotation-that-moves-with-mouse-in-lin
-// $(document).ready(function(){
-//   canvas.onmousemove = function (evt) {
-//         var points = myChart.getElementsAtXAxis(evt);
-//         annotation.annotations[0].value = new Date(myChart.config.data.labels[points[0]._index]);
-//         myChart.update();
-//     };
-/// / });
-
-
-// crosshairs
-// https://jsfiddle.net/8fp3uutt/
+// download button
+$('.download-button').on('click', function() {
+  var metal = $(this).data('metal');
+  var container = document.getElementById(metal);
+  var ctx = container.querySelector('canvas');
+  ctx.toBlob(function(blob) {
+    saveAs(blob, "chart_" + metal + ".png");
+  });
+});
 
 // gradient line:
 // https://blog.vanila.io/chart-js-tutorial-how-to-make-gradient-line-chart-af145e5c92f9

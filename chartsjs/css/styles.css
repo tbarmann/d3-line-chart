@@ -18,9 +18,9 @@ canvas {
 }
 .period-selector {
   position: absolute;
-  right: 10%;
+  right: 75px;
   top: 10%;
-  z-index:10;
+  z-index: 1;
   display: none;
 }
 
@@ -30,8 +30,8 @@ canvas {
 
 .period-selector input[type=radio] + label {
   display:inline-block;
-  margin:-4px;
-  padding: 4px 12px;
+  margin: -26px -4px -4px -4px;
+  padding: 4px 12px;-5px
   margin-bottom: 0;
   font-size: 14px;
   font-weight: bold;
@@ -42,14 +42,14 @@ canvas {
   text-shadow: 0 1px 1px rgba(255,255,255,0.75);
   vertical-align: middle;
   cursor: pointer;
-  background-image: -moz-linear-gradient(top,#fff,#e6e6e6);
-  background-image: -webkit-gradient(linear,0 0,0 100%,from(#fff),to(#e6e6e6));
-  background-image: -webkit-linear-gradient(top,#fff,#e6e6e6);
-  background-image: -o-linear-gradient(top,#fff,#e6e6e6);
+  background-image: -moz-linear-gradient(top,#fff,#a0a0a0);
+  background-image: -webkit-gradient(linear,0 0,0 100%,from(#fff),to(#a0a0a0));
+  background-image: -webkit-linear-gradient(top,#fff,#a0a0a0);
+  background-image: -o-linear-gradient(top,#fff,#a0a0a0);
   background-image: linear-gradient(to bottom,#fff,#a0a0a0);
   background-repeat: repeat-x;
   border: 1px solid #ccc;
-  border-color: #e6e6e6 #e6e6e6 #bfbfbf;
+  border-color: #a0a0a0 #a0a0a0 #bfbfbf;
   border-color: rgba(0,0,0,0.1) rgba(0,0,0,0.1) rgba(0,0,0,0.25);
   border-bottom-color: #b3b3b3;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff',endColorstr='#ffe6e6e6',GradientType=0);
@@ -90,9 +90,24 @@ canvas {
 
 .custom-tooltip td {
   padding: 5px 7px;
+  white-space: nowrap;
 }
 .custom-tooltip .date {
   width: 50%;
   background-color: rgba(33,36,41, 0.5);
 
+}
+.download-button {
+  padding: 0;
+  background-image: url("down-arrow40.png"), linear-gradient(to bottom, #fff, #a0a0a0);
+  width: 28px;
+  height: 28px; 
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius: 3px;
+  display: inline-block;
+  margin-left: 13px;
+  outline: 0;
+  color: #333;
+  border: 1px solid #ccc;
 }
