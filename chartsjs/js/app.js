@@ -4,7 +4,7 @@ var charts = [];
 var defaultMonthsToShow = 6;
 var chartBackgroundColor = '#212429';
 var customRed = '#FF4000';
-var chartPadding = {top: 125, left: 50, right: 75, bottom: 50};
+var chartPadding = {top: 75, left: 50, right: 75, bottom: 50};
 var xAxisFontColor = "white";
 
 Chart.plugins.register({
@@ -152,7 +152,9 @@ function buildConfig(price_data, metal) {
         label: function(tooltipItem, data) {
           return '$' + parseFloat(tooltipItem.yLabel).toFixed(2);
         }
-      }
+      },
+      backgroundColor: 'rgba(33,36,41, 0.5)',
+      displayColors: false
     },
     legend: {
       display: false
