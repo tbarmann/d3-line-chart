@@ -11,14 +11,14 @@ var formatTime = d3.time.format("%b %Y");
 var margin = {top: 75, right: 50, bottom: 75, left: 75},
   width = 900 - margin.left - margin.right,
   height = 400 - margin.top - margin.bottom;
- 
+
 // Parse the date/time of incoming data
 var parseDate = d3.time.format("%Y_%m").parse;
- 
+
 // Set the ranges
 var xScale = d3.time.scale().range([0, width]);
 var yScale = d3.scale.linear().range([height, 0]);
- 
+
 var yAxis2 = d3.svg.axis()
   .outerTickSize(0)
   .tickValues([])
@@ -32,10 +32,10 @@ var valueline = d3.svg.line()
 
 
 // Define the div for the tooltip
-var tooltip = d3.select("body").append("div") 
-  .attr("class", "custom-tooltip")       
+var tooltip = d3.select("body").append("div")
+  .attr("class", "custom-tooltip")
   .style("opacity", 0);
-    
+
 // Adds the svg canvas
 var svg = d3.select("body")
   .append("svg")
@@ -44,7 +44,7 @@ var svg = d3.select("body")
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
- 
+
 // Get the data
 d3.json("../data/alum.json", function(error, rawData) {
   data = parseData(rawData);
@@ -52,7 +52,7 @@ d3.json("../data/alum.json", function(error, rawData) {
     d.date = parseDate(d.date);
     d.price = +d.alum;
   });
- 
+
   var priceMin = d3.min(data, function(d) { return d.price; });
   var priceMax = d3.max(data, function(d) { return d.price; });
 
@@ -75,10 +75,10 @@ d3.json("../data/alum.json", function(error, rawData) {
 
 
   // Add the valueline path.
-  svg.append("path")  
+  svg.append("path")
     .attr("class", "line")
     .attr("d", valueline(data));
- 
+
 
   svg.selectAll(".dot")
     .data(data)
@@ -96,8 +96,8 @@ d3.json("../data/alum.json", function(error, rawData) {
         var dateHtml = '<div class="date">' + formatTime(d.date) + '</div>';
         var priceHtml = '<div class="price">' + d3.format("$,")(d.price) + '</div>';
         tooltip.html(dateHtml + priceHtml)
-          .style("left", (xScale(d.date)) + "px")
-          .style("top", (yScale(d.price) + margin.top) + "px");
+          .style("left", (xScale(d.date) + 8) + "px")
+          .style("top", (yScale(d.price) + margin.top - 40) + "px");
       })
       .on("mouseout", function(d) {
         d3.select(this).style({opacity: 0});
@@ -105,15 +105,15 @@ d3.json("../data/alum.json", function(error, rawData) {
           .duration(200)
           .style({opacity: 0})
       });
- 
+
   // Add the X Axis
-  svg.append("g")   
+  svg.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + height + ")")
     .call(xAxis);
- 
+
   // Add the Y Axis
-  svg.append("g")   
+  svg.append("g")
     .attr("class", "y axis")
     .call(yAxis);
 
@@ -121,7 +121,7 @@ d3.json("../data/alum.json", function(error, rawData) {
   svg.append("g")
     .classed("y axis", true)
     .attr("transform", "translate(" + width + ",0)")
-    .call(yAxis2);  
+    .call(yAxis2);
 
 });
- 
+

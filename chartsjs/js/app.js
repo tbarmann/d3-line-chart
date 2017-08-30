@@ -1,11 +1,14 @@
-
-var chartData = {};
-var charts = [];
+// configuration
+var metals = ['omi', 'aluminum'];
 var defaultMonthsToShow = 6;
 var chartBackgroundColor = '#212429';
 var customRed = '#FF4000';
-var chartPadding = {top: 75, left: 50, right: 75, bottom: 50};
+var chartPadding = {top: 100, left: 50, right: 75, bottom: 75};
 var xAxisFontColor = "white";
+
+// globals
+var chartData = {};
+var charts = [];
 
 Chart.plugins.register({
   beforeDraw: function(chartInstance) {
@@ -21,7 +24,7 @@ Chart.plugins.register({
         x = activePoint.tooltipPosition().x,
         topY = y_axis.top,
         bottomY = y_axis.bottom + 10;
-        
+
       // draw line
       ctx.save();
       ctx.beginPath();
@@ -36,10 +39,8 @@ Chart.plugins.register({
 });
 
 function getData() {
-  var metals = ['omi', 'aluminum'];
   var urls = metals.map(function(metal) {
-    return './js/' + metal + '.json';
-    // return 'https://www.e-illuminati.com/api.php?metal=' + metal + '&startDate=2013_01';
+    return 'https://www.e-illuminati.com/api.php?metal=' + metal + '&startDate=2013_01';
   });
   urls.forEach(function(url){
     $.getJSON(url, function(response) {
@@ -53,7 +54,7 @@ function getData() {
       charts[metal] = new Chart(ctx, config);
       $('.period-selector').show();
     });
-  });  
+  });
 }
 
 function slicePriceData(priceData, months) {
@@ -84,6 +85,9 @@ function buildConfig(price_data, metal) {
   var allPrices = combined.map(function(point){
     return point.price;
   });
+
+  var minPrice = Math.min.apply(this, allPrices);
+  var maxPrice = Math.max.apply(this, allPrices);
 
   var actualPrices = history.map(function(point) {
     return point.price;
@@ -147,10 +151,11 @@ function buildConfig(price_data, metal) {
     tooltips: {
       yAlign: 'top',
       enabled: true,
- //     custom: customToolTip(metal),
       callbacks: {
         label: function(tooltipItem, data) {
-          return '$' + parseFloat(tooltipItem.yLabel).toFixed(2);
+          return '$' + parseFloat(tooltipItem.yLabel)
+            .toFixed(2)
+            .replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
         }
       },
       backgroundColor: 'rgba(33,36,41, 0.5)',
@@ -215,15 +220,19 @@ function buildConfig(price_data, metal) {
         ticks: {
           callback: function(value, index, values) {
             if (index === values.length - 1)  {
-              return '$' + Math.min.apply(this, allPrices);
+              return '$' + parseFloat(minPrice)
+                .toFixed(2)
+                .replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
             }
             if (index === 0) {
-              return '$' + Math.max.apply(this, allPrices);
+              return '$' + parseFloat(maxPrice)
+                .toFixed(2)
+                .replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
             }
             return '';
           },
-          min: Math.min.apply(this, allPrices),
-          max: Math.max.apply(this, allPrices),
+          min: minPrice,
+          max: maxPrice,
           fontColor: "#fff"
         }
       }]
@@ -311,13 +320,10 @@ function customToolTip(metal) {
     var position = this._chart.canvas.getBoundingClientRect();
     var tooltipWidth = tooltipEl.clientWidth;
     var tooltipHeight = tooltipEl.clientHeight;
-    
+
     // get offsets to center and place tooltip above point
     var hOffset = (tooltipWidth / -2) - 20;
     var vOffset = (tooltipHeight * -1) - 20;
-    // var hOffset = 0;
-    // var hOffset = 0;
-    // Display, position
     tooltipEl.style.opacity = 1;
     tooltipEl.style.left = position.left + hOffset + tooltipModel.caretX + 'px';
     tooltipEl.style.top = position.top + vOffset + tooltipModel.caretY + 'px';
@@ -333,10 +339,4 @@ $('.download-button').on('click', function() {
     saveAs(blob, "chart_" + metal + ".png");
   });
 });
-
-// gradient line:
-// https://blog.vanila.io/chart-js-tutorial-how-to-make-gradient-line-chart-af145e5c92f9
-
-// tooltip docs
-// https://github.com/chartjs/Chart.js/blob/3e94b9431a5b3d6e4bfbfd6a2339a350999b3292/docs/configuration/tooltip.md#custom-tooltips
 
